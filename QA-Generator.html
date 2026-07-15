@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Test Case Generator — AI Powered</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f4f5f7; --surface: #ffffff; --surface-2: #f8f9fa;
+    --border: #e1e4e8; --border-strong: #c9cdd4;
+    --text-primary: #1a1d23; --text-secondary: #5a6072; --text-muted: #8b91a0;
+    --accent: #1F4E79; --accent-light: #e8f0f9; --accent-mid: #2E75B6;
+    --success: #1a7a4a; --success-bg: #e8f5ee;
+    --warning: #7a4a0a; --warning-bg: #fdf3e3;
+    --danger: #8b1a1a; --danger-bg: #fde8e8;
+    --purple: #4a3baa; --purple-bg: #eeedfb;
+    --radius: 8px; --radius-lg: 12px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; font-size: 15px; line-height: 1.6; }
+  header { background: var(--accent); color: #fff; padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+  .header-brand { display: flex; align-items: center; gap: 10px; }
+  .header-title { font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+  .header-sub { font-size: 12px; opacity: .65; margin-top: 1px; }
+  .header-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; background: rgba(255,255,255,.15); border-radius: 20px; letter-spacing: .03em; }
+  .app { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  label { font-size: 13px; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+  textarea { width: 100%; min-height: 110px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-family: inherit; color: var(--text-primary); background: var(--surface-2); resize: vertical; line-height: 1.6; transition: border-color .15s; }
+  textarea:focus { outline: none; border-color: var(--accent-mid); background: var(--surface); }
+  textarea::placeholder { color: var(--text-muted); }
+  .pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.25rem; }
+  .pill { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; border: 1.5px solid var(--border); background: var(--surface-2); color: var(--text-secondary); cursor: pointer; transition: all .15s; user-select: none; }
+  .pill:hover { border-color: var(--accent-mid); color: var(--accent); }
+  .pill.active { background: var(--accent-light); border-color: var(--accent-mid); color: var(--accent); }
+  .pill-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .6; }
+  .options-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+  select { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: inherit; color: var(--text-primary); background: var(--surface-2); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b91a0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 32px; }
+  select:focus { outline: none; border-color: var(--accent-mid); }
+  .api-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .api-row input { flex: 1; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: 'Courier New', monospace; color: var(--text-primary); background: var(--surface-2); }
+  .api-row input:focus { outline: none; border-color: var(--accent-mid); }
+  .api-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+  .api-note a { color: var(--accent-mid); text-decoration: none; }
+  .btn-generate { width: 100%; padding: 13px; border: none; border-radius: var(--radius); background: var(--accent); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s, transform .1s; letter-spacing: -.01em; }
+  .btn-generate:hover:not(:disabled) { background: #163a5c; }
+  .btn-generate:active:not(:disabled) { transform: scale(.99); }
+  .btn-generate:disabled { opacity: .55; cursor: not-allowed; }
+  .loading-bar { height: 3px; border-radius: 2px; background: var(--border); overflow: hidden; margin: 1rem 0 0; display: none; }
+  .loading-bar.visible { display: block; }
+  .loading-bar-inner { height: 100%; background: var(--accent-mid); border-radius: 2px; animation: loadpulse 1.8s ease-in-out infinite; }
+  @keyframes loadpulse { 0% { width: 5%; } 50% { width: 75%; } 100% { width: 92%; } }
+  .loading-text { text-align: center; font-size: 13px; color: var(--text-muted); padding: .5rem; display: none; }
+  .loading-text.visible { display: block; }
+  .error-banner { background: var(--danger-bg); border: 1px solid #f5b8b8; border-radius: var(--radius); padding: 12px 16px; font-size: 13px; color: var(--danger); display: none; margin: 1rem 0 0; }
+  .error-banner.visible { display: flex; align-items: flex-start; gap: 8px; }
+  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px; }
+  .results-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .count-badge { font-size: 12px; font-weight: 600; padding: 3px 10px; background: var(--accent-light); color: var(--accent); border-radius: 20px; }
+  .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-pill { font-size: 12px; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-secondary); cursor: pointer; transition: all .15s; }
+  .filter-pill:hover, .filter-pill.active { background: var(--accent-light); border-color: var(--accent-mid); color: var(--accent); }
+  .btn-export { padding: 7px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 500; border: 1.5px solid var(--border-strong); background: var(--surface); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .15s; }
+  .btn-export:hover { border-color: var(--accent-mid); color: var(--accent); background: var(--accent-light); }
+  .tc-grid { display: flex; flex-direction: column; gap: 12px; }
+  .tc-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color .15s; }
+  .tc-card:hover { border-color: var(--border-strong); }
+  .tc-card.hidden { display: none; }
+  .tc-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); gap: 10px; flex-wrap: wrap; }
+  .tc-id-row { display: flex; align-items: center; gap: 10px; }
+  .tc-id { font-size: 12px; font-weight: 700; font-family: 'Courier New', monospace; color: var(--accent); background: var(--accent-light); padding: 2px 8px; border-radius: 4px; letter-spacing: .04em; }
+  .tc-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .priority-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+  .priority-high { background: var(--danger-bg); color: var(--danger); }
+  .priority-medium { background: var(--warning-bg); color: var(--warning); }
+  .priority-low { background: var(--success-bg); color: var(--success); }
+  .tc-body { padding: 16px; display: grid; gap: 12px; }
+  .tc-row { display: grid; grid-template-columns: 140px 1fr; gap: 12px; }
+  .tc-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; padding-top: 2px; }
+  .tc-value { font-size: 13px; color: var(--text-primary); line-height: 1.6; }
+  .tc-value ul { padding-left: 1.2rem; }
+  .tc-value li { margin-bottom: 4px; }
+  .tc-type-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; letter-spacing: .03em; }
+  .type-functional { background: var(--accent-light); color: var(--accent); }
+  .type-security { background: var(--purple-bg); color: var(--purple); }
+  .type-edge { background: var(--warning-bg); color: var(--warning); }
+  .type-negative { background: var(--danger-bg); color: var(--danger); }
+  .empty-state { text-align: center; padding: 3rem 2rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+  .empty-title { font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: .4rem; margin-top: 1rem; }
+  .empty-sub { font-size: 13px; color: var(--text-muted); max-width: 360px; margin: 0 auto; }
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 1.25rem 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .example-chip { font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 1px dashed var(--border-strong); color: var(--text-muted); cursor: pointer; background: var(--surface-2); transition: all .15s; }
+  .example-chip:hover { border-color: var(--accent-mid); color: var(--accent); background: var(--accent-light); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (max-width: 600px) { .options-row { grid-template-columns: 1fr; } .tc-row { grid-template-columns: 1fr; } .stats-row { grid-template-columns: repeat(3, 1fr); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    <div>
+      <div class="header-title">QA Test Case Generator</div>
+      <div class="header-sub">AI-powered · Built with Claude API</div>
+    </div>
+  </div>
+  <div class="header-badge">Powered by Claude</div>
+</header>
+
+<div class="app">
+
+  <div class="card">
+    <div class="card-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Feature description
+    </div>
+    <label for="feature-input">Paste a user story or feature description</label>
+    <textarea id="feature-input" placeholder="e.g. Users should be able to log in with their email and password. After 3 failed login attempts, the account should be locked for 15 minutes and the user notified by email."></textarea>
+    <div class="examples">
+      <span class="example-chip" onclick="setExample(0)">Login with lockout</span>
+      <span class="example-chip" onclick="setExample(1)">Password reset</span>
+      <span class="example-chip" onclick="setExample(2)">User registration</span>
+      <span class="example-chip" onclick="setExample(3)">Search &amp; filter</span>
+      <span class="example-chip" onclick="setExample(4)">File upload</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M19.07 19.07l-1.41-1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+      Test configuration
+    </div>
+    <label>Test types to generate</label>
+    <div class="pill-group" id="type-pills">
+      <div class="pill active" data-type="functional" onclick="togglePill(this)"><span class="pill-dot"></span>Functional</div>
+      <div class="pill active" data-type="security" onclick="togglePill(this)"><span class="pill-dot"></span>Security</div>
+      <div class="pill active" data-type="edge" onclick="togglePill(this)"><span class="pill-dot"></span>Edge cases</div>
+      <div class="pill active" data-type="negative" onclick="togglePill(this)"><span class="pill-dot"></span>Negative tests</div>
+    </div>
+    <div class="options-row">
+      <div>
+        <label for="count-select">Number of test cases</label>
+        <select id="count-select">
+          <option value="5">5 test cases</option>
+          <option value="8">8 test cases</option>
+          <option value="12" selected>12 test cases</option>
+          <option value="15">15 test cases</option>
+        </select>
+      </div>
+      <div>
+        <label for="format-select">Test format</label>
+        <select id="format-select">
+          <option value="standard" selected>Standard (steps + expected)</option>
+          <option value="gherkin">Gherkin (Given / When / Then)</option>
+          <option value="exploratory">Exploratory charters</option>
+        </select>
+      </div>
+    </div>
+    <label for="api-key">Anthropic API key</label>
+    <div class="api-row">
+      <input type="password" id="api-key" placeholder="sk-ant-api03-..." autocomplete="off" />
+    </div>
+    <p class="api-note">Your key is never stored or sent anywhere except Anthropic's API. Get one free at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></p>
+  </div>
+
+  <button class="btn-generate" id="gen-btn" onclick="generate()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    Generate Test Cases
+  </button>
+
+  <div class="loading-bar" id="loading-bar"><div class="loading-bar-inner"></div></div>
+  <div class="loading-text" id="loading-text">Claude is analysing the feature and generating structured test cases...</div>
+  <div class="error-banner" id="error-banner">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="error-text"></span>
+  </div>
+
+  <div class="stats-row" id="stats-row" style="display:none">
+    <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total cases</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-high" style="color:#8b1a1a">0</div><div class="stat-label">High priority</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-types">0</div><div class="stat-label">Test types</div></div>
+  </div>
+
+  <div id="results-area">
+    <div class="empty-state" id="empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto;display:block;opacity:.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <div class="empty-title">No test cases yet</div>
+      <div class="empty-sub">Describe a feature above and click Generate. Claude will produce structured, ready-to-use test cases.</div>
+    </div>
+    <div id="tc-list" style="display:none">
+      <div class="results-header">
+        <div class="results-meta">
+          <span class="count-badge" id="count-badge">0 test cases</span>
+          <div class="filter-pills" id="filter-pills"></div>
+        </div>
+        <button class="btn-export" onclick="exportCSV()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+      <div class="tc-grid" id="tc-grid"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const EXAMPLES = [
+  "Users should be able to log in with their email and password. After 3 failed login attempts, the account should be locked for 15 minutes and the user notified by email.",
+  "Users can request a password reset by entering their registered email address. They receive a reset link valid for 60 minutes. The link expires after use.",
+  "New users can register with their name, email, and password. Email must be unique. Password must be at least 8 characters with one uppercase letter, one number, and one special character.",
+  "Users can search a product catalogue by keyword, and filter results by category, price range, and availability. Results should be paginated with 20 items per page.",
+  "Users can upload profile images up to 5MB in JPEG or PNG format. Files are scanned for malware before being stored. Oversized or invalid files are rejected with a clear error message."
+];
+
+function setExample(i) { document.getElementById('feature-input').value = EXAMPLES[i]; }
+
+function togglePill(el) { el.classList.toggle('active'); }
+
+function getSelectedTypes() {
+  return Array.from(document.querySelectorAll('#type-pills .pill.active')).map(p => p.dataset.type);
+}
+
+let currentTestCases = [];
+let activeFilter = 'all';
+
+async function generate() {
+  const feature = document.getElementById('feature-input').value.trim();
+  const apiKey  = document.getElementById('api-key').value.trim();
+  const count   = document.getElementById('count-select').value;
+  const format  = document.getElementById('format-select').value;
+  const types   = getSelectedTypes();
+
+  if (!feature) return showError("Please enter a feature description first.");
+  if (!apiKey)  return showError("Please enter your Anthropic API key.");
+  if (!types.length) return showError("Please select at least one test type.");
+
+  clearError();
+  setLoading(true);
+
+  const typeLabels = {
+    functional: "Functional (happy path, core workflows)",
+    security:   "Security (auth, injection, access control)",
+    edge:       "Edge cases (boundary values, unusual inputs)",
+    negative:   "Negative tests (invalid input, error handling)"
+  };
+
+  const formatInstructions = {
+    standard:    "Each test case must have numbered steps in the steps array and a clear expectedResult string.",
+    gherkin:     "Format each test case steps as Gherkin: 'Given [precondition]', 'When [action]', 'Then [outcome]'. Put all three in the steps array.",
+    exploratory: "Format each test as an exploratory charter: steps should contain ['Explore: [area]', 'With: [technique]', 'To discover: [risk]']"
+  };
+
+  const prompt = `You are a senior QA engineer with 10 years of experience writing structured test cases for enterprise software.
+
+A product team has provided this feature description:
+"""
+${feature}
+"""
+
+Generate exactly ${count} manual test cases covering these test types: ${types.map(t => typeLabels[t]).join(', ')}.
+
+${formatInstructions[format]}
+
+Return ONLY a valid JSON array — no markdown, no explanation, no code fences. The array must contain exactly ${count} objects:
+[
+  {
+    "id": "TC-001",
+    "name": "Descriptive test case name",
+    "type": "functional|security|edge|negative",
+    "priority": "High|Medium|Low",
+    "preconditions": "What must be true before this test runs",
+    "steps": ["Step 1", "Step 2", "Step 3"],
+    "expectedResult": "What should happen if the test passes",
+    "notes": "Any important notes or test data (can be empty string)"
+  }
+]
+
+Rules: IDs must be sequential TC-001, TC-002 etc. Priority: High = critical path or security risk. Steps must be clear enough for a junior tester. Use realistic test data like user@example.com or P@ssw0rd123!. Type must be one of: functional, security, edge, negative.`;
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 4000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API error ${response.status}`);
+    }
+
+    const data = await response.json();
+    const raw  = data.content?.[0]?.text || "";
+    const clean = raw.replace(/```json|```/g, "").trim();
+
+    let testCases;
+    try {
+      testCases = JSON.parse(clean);
+    } catch {
+      const match = clean.match(/\[[\s\S]*\]/);
+      if (!match) throw new Error("Claude returned an unexpected format. Please try again.");
+      testCases = JSON.parse(match[0]);
+    }
+
+    if (!Array.isArray(testCases) || !testCases.length) throw new Error("No test cases returned. Please try again.");
+
+    currentTestCases = testCases;
+    activeFilter = 'all';
+    renderResults(testCases);
+
+  } catch (err) {
+    showError(err.message || "Unexpected error. Please check your API key and try again.");
+  } finally {
+    setLoading(false);
+  }
+}
+
+function renderResults(cases) {
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('tc-list').style.display = 'block';
+  document.getElementById('stats-row').style.display = 'grid';
+
+  const highCount = cases.filter(c => c.priority === 'High').length;
+  const typeSet   = new Set(cases.map(c => c.type));
+  document.getElementById('stat-total').textContent = cases.length;
+  document.getElementById('stat-high').textContent  = highCount;
+  document.getElementById('stat-types').textContent = typeSet.size;
+  document.getElementById('count-badge').textContent = `${cases.length} test case${cases.length !== 1 ? 's' : ''}`;
+
+  const fpContainer = document.getElementById('filter-pills');
+  fpContainer.innerHTML = '';
+  ['all', ...Array.from(typeSet)].forEach(f => {
+    const pill = document.createElement('button');
+    pill.className = 'filter-pill' + (f === 'all' ? ' active' : '');
+    pill.textContent = f === 'all' ? 'All' : cap(f);
+    pill.onclick = () => filterBy(f);
+    fpContainer.appendChild(pill);
+  });
+
+  const grid = document.getElementById('tc-grid');
+  grid.innerHTML = '';
+  cases.forEach(tc => grid.appendChild(buildCard(tc)));
+}
+
+function buildCard(tc) {
+  const card = document.createElement('div');
+  card.className = 'tc-card';
+  card.dataset.type = tc.type || 'functional';
+  const stepsHtml = (tc.steps || []).map(s => `<li>${esc(s)}</li>`).join('');
+  const notesRow  = tc.notes ? `<div class="tc-row"><div class="tc-label">Notes</div><div class="tc-value" style="color:var(--text-muted);font-style:italic">${esc(tc.notes)}</div></div>` : '';
+  card.innerHTML = `
+    <div class="tc-header">
+      <div class="tc-id-row">
+        <span class="tc-id">${esc(tc.id||'TC-???')}</span>
+        <span class="tc-name">${esc(tc.name||'Unnamed test')}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span class="tc-type-badge type-${tc.type||'functional'}">${cap(tc.type||'functional')}</span>
+        <span class="priority-badge priority-${(tc.priority||'medium').toLowerCase()}">${tc.priority||'Medium'}</span>
+      </div>
+    </div>
+    <div class="tc-body">
+      <div class="tc-row"><div class="tc-label">Preconditions</div><div class="tc-value">${esc(tc.preconditions||'—')}</div></div>
+      <div class="tc-row"><div class="tc-label">Steps</div><div class="tc-value"><ul>${stepsHtml}</ul></div></div>
+      <div class="tc-row"><div class="tc-label">Expected result</div><div class="tc-value" style="font-weight:500">${esc(tc.expectedResult||'—')}</div></div>
+      ${notesRow}
+    </div>`;
+  return card;
+}
+
+function filterBy(type) {
+  activeFilter = type;
+  document.querySelectorAll('.filter-pill').forEach(p => {
+    p.classList.toggle('active', p.textContent.toLowerCase() === type || (type === 'all' && p.textContent === 'All'));
+  });
+  document.querySelectorAll('.tc-card').forEach(card => {
+    card.classList.toggle('hidden', type !== 'all' && card.dataset.type !== type);
+  });
+  const visible = document.querySelectorAll('.tc-card:not(.hidden)').length;
+  document.getElementById('count-badge').textContent = `${visible} test case${visible !== 1 ? 's' : ''}`;
+}
+
+function exportCSV() {
+  if (!currentTestCases.length) return;
+  const headers = ['ID','Name','Type','Priority','Preconditions','Steps','Expected Result','Notes'];
+  const rows = currentTestCases.map(tc => [
+    tc.id, tc.name, tc.type, tc.priority, tc.preconditions,
+    (tc.steps||[]).join(' | '), tc.expectedResult, tc.notes||''
+  ]);
+  const csv = [headers,...rows].map(r => r.map(c => `"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([csv], {type:'text/csv'})),
+    download: `test-cases-${new Date().toISOString().slice(0,10)}.csv`
+  });
+  a.click();
+}
+
+function setLoading(on) {
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = on;
+  btn.innerHTML = on
+    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Generating...`
+    : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate Test Cases`;
+  document.getElementById('loading-bar').classList.toggle('visible', on);
+  document.getElementById('loading-text').classList.toggle('visible', on);
+}
+
+function showError(msg) {
+  const b = document.getElementById('error-banner');
+  document.getElementById('error-text').textContent = msg;
+  b.classList.add('visible');
+}
+function clearError() { document.getElementById('error-banner').classList.remove('visible'); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+document.addEventListener('keydown', e => { if ((e.metaKey||e.ctrlKey) && e.key==='Enter') generate(); });
+</script>
+</body>
+</html>

@@ -4,6 +4,7 @@
 
 ![Demo](https://img.shields.io/badge/Status-Live-brightgreen) ![Built With](https://img.shields.io/badge/Built%20With-Claude%20API-blue) ![Language](https://img.shields.io/badge/Language-HTML%20%2F%20JavaScript-yellow) ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
+🔗 **[Live Demo](https://chinwe0406.github.io/AI-QA-Generator/)**
 ---
 
 ## 📌 Overview
